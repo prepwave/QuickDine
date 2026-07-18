@@ -25,8 +25,13 @@ export const getRestaurants = async (
     };
 
     if (search) {
+      if (typeof search !== "string" || search.length > 100) {
+        res.status(400).json({ success: false, message: "Invalid search query" });
+        return;
+      }
+      const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       query.name = {
-        $regex: search,
+        $regex: escapedSearch,
         $options: "i",
       };
     }
