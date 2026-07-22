@@ -10,11 +10,13 @@ import authRouter from "./routes/authRoutes.js";
 import restaurantRouter from "./routes/restaurantRoutes.js";
 import bookingRouter from "./routes/bookingRoutes.js";
 import ownerRouter from "./routes/ownerRoutes.js";
+import adminRoutes from "./routes/adminRautes.js";
 
 const app = express();
 
 console.log("Mongo URI:", process.env.MONGODB_URI);
 
+// connect to MongoDB
 await connectDB();
 
 app.use(cors());
@@ -30,6 +32,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/restaurants", restaurantRouter);
 app.use("/api/bookings", bookingRouter);
 app.use("/api/owner", ownerRouter);
+app.use("/api/admin", adminRoutes);
 
 // Global Error Handler
 app.use((
