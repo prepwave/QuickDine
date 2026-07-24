@@ -56,6 +56,7 @@ export default function RestaurantDetail() {
     useEffect(() => {
         const fetchAvailability = async () => {
            if(!restaurant?._id || !selectedDate) return;
+           setSelectedSlot("");
            try {
             setLoadingSlots(true);
             const res = await api.get(`/restaurant/${restaurant._id}/availability?date=${selectedDate}`);
