@@ -5,8 +5,8 @@ import { aproveRestaurant, getAllRestaurant, getAllRestaurants } from "../contro
 
 const adminRoutes = Router();
 
-adminRoutes.get("/restaurants", getAllRestaurants);
-adminRoutes.put("/restaurants/:id/approve", aproveRestaurant);
+adminRoutes.get("/restaurant", getAllRestaurants);
+adminRoutes.put("/restaurant/:id/approve", aproveRestaurant);
 adminRoutes.get("/stats", getAllRestaurant);
 
 export default adminRoutes;

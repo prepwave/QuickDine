@@ -200,3 +200,72 @@ export const getRestaurantBookings = async (
     });
   }
 };
+
+export const getRestaurantAvailability = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { restaurantId } = req.params;
+    const { date } = req.query;
+
+    if (!date) {
+      res.status(400).json({
+        success: false,
+        message: "Date is required",
+      });
+      return;
+    }
+
+    const selectedDate = new Date(date as string);
+
+    const startOfDay = new Date(selectedDate);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(selectedDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const allSlots = [
+      "18:00",
+      "18:30",
+      "19:00",
+      "19:30",
+      "20:00",
+      "20:30",
+      "21:00",
+      "21:30",
+      "22:00",
+    ];
+
+    const bookings = await Booking.find({
+      restaurant: restaurantId,
+      bookingDate: {
+        $gte: startOfDay,
+        $lte: endOfDay,
+      },
+      status: {
+        $in: ["pending", "confirmed"],
+      },
+    });
+
+    console.log("Bookings:", bookings);
+
+    const bookedSlots = bookings.map((b) => b.timeSlot);
+
+    console.log("Booked Slots:", bookedSlots);
+
+    const availability = allSlots.map((slot) => ({
+      time: slot,
+      available: !bookedSlots.includes(slot),
+    }));
+
+    res.status(200).json(availability);
+  } catch (error: any) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

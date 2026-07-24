@@ -92,12 +92,86 @@ export const getMyBooking = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  // code
+  try {
+    const user = (req as any).user?.id;
+
+    if (!user) {
+      res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+      return;
+    }
+
+    const bookings = await Booking.find({ user })
+      .populate("restaurant", "name image location slug")
+      .sort({ bookingDate: 1 });
+
+    res.status(200).json({
+      success: true,
+      bookings,
+    });
+  } catch (error: any) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
 };
 
 export const cancelBooking = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  // code
+  try {
+    const { id } = req.params;
+    const user = (req as any).user.id;
+
+    const booking = await Booking.findById(id);
+
+    if (!booking) {
+      res.status(404).json({
+        success: false,
+        message: "Booking not found",
+      });
+      return;
+    }
+
+    // Sirf apni booking cancel kar sake
+    if (booking.user.toString() !== user) {
+      res.status(403).json({
+        success: false,
+        message: "Unauthorized",
+      });
+      return;
+    }
+
+    // Already cancelled
+    if (booking.status === "cancelled") {
+      res.status(400).json({
+        success: false,
+        message: "Booking already cancelled",
+      });
+      return;
+    }
+
+    booking.status = "cancelled";
+
+    await booking.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Booking cancelled successfully",
+      booking,
+    });
+  } catch (error: any) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
 };

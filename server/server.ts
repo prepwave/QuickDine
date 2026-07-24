@@ -11,13 +11,19 @@ import restaurantRouter from "./routes/restaurantRoutes.js";
 import bookingRouter from "./routes/bookingRoutes.js";
 import ownerRouter from "./routes/ownerRoutes.js";
 import adminRoutes from "./routes/adminRautes.js";
-
+import "./config/cloudinary.js";
 const app = express();
-
-console.log("Mongo URI:", process.env.MONGODB_URI);
 
 // connect to MongoDB
 await connectDB();
+import { v2 as cloudinary } from "cloudinary";
+
+try {
+  const result = await cloudinary.api.ping();
+  console.log("Cloudinary Ping:", result);
+} catch (err) {
+  console.error("Cloudinary Ping Error:", err);
+}
 
 app.use(cors());
 app.use(express.json());
@@ -29,7 +35,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use("/api/auth", authRouter);
-app.use("/api/restaurants", restaurantRouter);
+app.use("/api/restaurant", restaurantRouter);
 app.use("/api/bookings", bookingRouter);
 app.use("/api/owner", ownerRouter);
 app.use("/api/admin", adminRoutes);

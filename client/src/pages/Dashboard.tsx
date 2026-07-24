@@ -8,7 +8,7 @@ import RestaurantCard from "../components/RestaurantCard.tsx";
 import AuthModal from "../components/AuthModal.tsx";
 import { CalendarIcon, UsersIcon, ClockIcon, MapPinIcon, CalendarDaysIcon } from "lucide-react";
 import toast from "react-hot-toast";
-import { dummyFeaturedRestaurants, dummyMyBookingsData } from "../assets/assets.ts";
+import api from "../lib/api.ts";
 
 export default function Dashboard() {
     const { user } = useAppContext();
@@ -20,8 +20,16 @@ export default function Dashboard() {
     // Fetch user bookings
     useEffect(() => {
         const fetchBookings = async () => {
-            setBookings(dummyMyBookingsData);
-            setLoadingBookings(false);
+           try {
+               setLoadingBookings(true);
+               const res = await api.get("/bookings/my");
+
+                setBookings(res.data.bookings);
+           } catch (error: any) {
+               toast.error(error?.response?.data?.message || error?.message);
+           } finally {
+               setLoadingBookings(false);
+           }
         };
 
         if (user) {
@@ -32,7 +40,13 @@ export default function Dashboard() {
     // Fetch generic recommendations
     useEffect(() => {
         const fetchRecommendations = async () => {
-            setRecommendations(dummyFeaturedRestaurants);
+            try {
+                const res = await api.get("/restaurant/featured");
+
+                setRecommendations(res.data.restaurants);
+            } catch (error: any) {
+                toast.error(error?.response?.data?.message || error?.message);
+            }
         };
         fetchRecommendations();
     }, []);
@@ -43,7 +57,9 @@ export default function Dashboard() {
         }
 
         try {
-            setBookings((prev) => prev.map((b) => (b._id === bookingId ? { ...b, status: "cancelled" } : b)));
+           await api.put(`/bookings/${bookingId}/cancel`);
+        //    Update local state 
+        setBookings((prev) => prev.map((b) => (b._id === bookingId ? { ...b, status: "cancelled" } : b)))
             toast.success("Reservation cancelled successfully.");
         } catch (error: any) {
             toast.error(error?.response?.data?.message || error?.message);
@@ -57,14 +73,22 @@ export default function Dashboard() {
     today.setHours(0, 0, 0, 0);
 
     const upcomingBookings = bookings.filter((b) => {
-        const bDate = new Date(b.date);
-        return bDate >= today && b.status === "confirmed";
-    });
+    const bDate = new Date(b.bookingDate);
+    return (
+        bDate >= today &&
+        (b.status === "pending" || b.status === "confirmed")
+    );
+});
 
     const pastBookings = bookings.filter((b) => {
-        const bDate = new Date(b.date);
-        return bDate < today || b.status !== "confirmed";
-    });
+    const bDate = new Date(b.bookingDate);
+
+    return (
+        bDate < today ||
+        b.status === "cancelled" ||
+        b.status === "completed"
+    );
+});
 
     return (
         <div className="min-h-screen bg-surface flex flex-col pt-20">
@@ -136,11 +160,11 @@ export default function Dashboard() {
                                             <div className="flex flex-wrap items-center gap-6 text-xs text-on-surface bg-surface-container-low p-4 rounded-md border border-outline-variant/10 w-full md:w-auto">
                                                 <div className="flex items-center gap-2 pr-4 md:border-r border-outline-variant/20">
                                                     <CalendarIcon size={14} className="text-secondary" />
-                                                    <span className="font-medium">{new Date(b.date).toLocaleDateString()}</span>
+                                                    <span className="font-medium">{new Date(b.bookingDate).toLocaleDateString()}</span>
                                                 </div>
                                                 <div className="flex items-center gap-2 pr-4 md:border-r border-outline-variant/20">
                                                     <ClockIcon size={14} className="text-secondary" />
-                                                    <span className="font-medium">{b.time} PM</span>
+                                                    <span className="font-medium">{b.timeSlot}</span>
                                                 </div>
                                                 <div className="flex items-center gap-2">
                                                     <UsersIcon size={14} className="text-secondary" />
@@ -191,7 +215,7 @@ export default function Dashboard() {
                                                                   </Link>
                                                               </td>
                                                               <td className="p-4">
-                                                                  {new Date(b.date).toLocaleDateString()} at {b.time} PM
+                                                                  {new Date(b.bookingDate).toLocaleDateString()} at {b.timeSlot}
                                                               </td>
                                                               <td className="p-4">
                                                                   {b.guests} {b.guests === 1 ? "Guest" : "Guests"}
