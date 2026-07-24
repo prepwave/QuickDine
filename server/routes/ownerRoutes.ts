@@ -21,7 +21,11 @@ ownerRouter.get("/restaurant",  getOwnerRestaurant);
 // Create restaurant
 ownerRouter.post(
   "/restaurant",
-  protect,
+  (req, res, next) => {
+    console.log("POST /api/owner/restaurant HIT");
+    next();
+  },
+  
   upload.single("image"),
   createRestaurant
 );
@@ -29,13 +33,13 @@ ownerRouter.post(
 // Update restaurant
 ownerRouter.put(
   "/restaurant",
-  protect,
+  
   upload.single("image"),
   updateOwnerRestaurant
 );
 
 // Get owner's bookings
-ownerRouter.get("/bookings", protect, getOwnerBookings);
+ownerRouter.get("/bookings",  getOwnerBookings);
 
 ownerRouter.put("/bookings/:id/status", updateBookingStatus);
 

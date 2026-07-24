@@ -86,9 +86,10 @@ export default function BookingWidget({
                                         ? slotsAvailability
                                         : (restaurant.availableSlots || []).map((s: string) => ({
                                               time: s,
-                                              availableSeats: 20,
-                                              isAvailable: true,
+                                             available: true,
+                                             
                                           }));
+                                          
                                 return allSlots.filter((slotInfo: any) => {
                                     if (!isToday) return true;
                                     const [slotHour, slotMinute] = slotInfo.time.split(":").map(Number);
@@ -100,7 +101,7 @@ export default function BookingWidget({
                             })().map((slotInfo: any) => {
                                 const slot = slotInfo.time;
                                 const isSelected = selectedSlot === slot;
-                                const isFull = !slotInfo.isAvailable || slotInfo.availableSeats < Number(selectedGuests);
+                               const isFull = !slotInfo.available;
                                 return (
                                     <button
                                         key={slot}

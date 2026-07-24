@@ -2,7 +2,8 @@
 import React, { useState } from "react";
 import { Utensils, Upload, Image } from "lucide-react";
 import toast from "react-hot-toast";
-import { dummyRestaurant } from "../../assets/assets.ts";
+
+import api from "../../lib/api.ts";
 
 interface RestaurantWizardProps {
     setRestaurant: (restaurant: any) => void;
@@ -59,17 +60,23 @@ export default function RestaurantWizard({ setRestaurant }: RestaurantWizardProp
     };
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            setImageFile(file);
-            setImagePreview(URL.createObjectURL(file));
-        }
-    };
+  const file = e.target.files?.[0];
+
+  console.log(file);
+
+  if (file) {
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  }
+}
+
+
 
     const handleCreateRestaurant = async (e: React.FormEvent) => {
         e.preventDefault();
         setFormLoading(true);
         try {
+            console.log("imageFile:", imageFile);
             const formData = new FormData();
             formData.append("name", name);
             formData.append("description", description);
@@ -84,10 +91,19 @@ export default function RestaurantWizard({ setRestaurant }: RestaurantWizardProp
             if (imageFile) {
                 formData.append("image", imageFile);
             }
-
-            setRestaurant(dummyRestaurant[0]);
+            
+            const res = await api.post("/owner/restaurant", formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+            });
+            setRestaurant(res.data)
+            
+            
+            
             toast.success("Restaurant profile submitted successfully! Awaiting Admin approval.");
         } catch (error: any) {
+
             toast.error(error?.response?.data?.message || "Failed to register restaurant");
         } finally {
             setFormLoading(false);

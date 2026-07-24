@@ -5,17 +5,26 @@ import {v2 as cloudinary} from 'cloudinary'
 import Booking from "../models/Booking.js";
 
 // Helper Function to upload buffer to cloudinary
-const uploadToCloudinary = (fileBuffer: Buffer ): Promise<{secure_url: string}>=> {
-  return new Promise((resolve, reject)=>{
-    const stream= cloudinary.uploader.upload_stream({folder: "Quickdine"}, (error,result)=>{
-      if(error ) return reject(error )
-      if(!result) return reject(new Error("Upload failed"));
-      resolve({secure_url: result.secure_url})
-    })
-    stream.end(fileBuffer)
-  })
+const uploadToCloudinary = (
+  fileBuffer: Buffer
+): Promise<{ secure_url: string }> => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: "Quickdine" },
+      (error, result) => {
+        console.log("Cloudinary Error:", error);
+        console.log("Cloudinary Result:", result);
 
-}
+        if (error) return reject(error);
+        if (!result) return reject(new Error("Upload failed"));
+
+        resolve({ secure_url: result.secure_url });
+      }
+    );
+
+    stream.end(fileBuffer);
+  });
+};
 
 // ======================================================
 // Get owner's restaurant
@@ -71,6 +80,14 @@ export const createRestaurant = async (
   res: Response
 ): Promise<void> => {
   try {
+     console.log("========== CREATE RESTAURANT ==========");
+    console.log("req.user =", req.user);
+    console.log("req.file =", req.file);
+    console.log("req.body =", req.body);
+
+
+    
+
     const ownerId = req.user?.id;
 
     if (!ownerId) {
@@ -107,7 +124,8 @@ export const createRestaurant = async (
       availableSlots,
       totalSeats,
     } = req.body;
-
+    console.log(req.file);
+    console.log(req.body);
     const slug = name
       .toLowerCase()
       .trim()
@@ -151,12 +169,17 @@ export const createRestaurant = async (
       restaurant,
     });
   } catch (error: any) {
-    console.error(error);
+    console.error("===== CREATE RESTAURANT ERROR =====");
+  console.error(error);
 
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+  if (error.stack) {
+    console.error(error.stack);
+  }
+
+  res.status(500).json({
+    success: false,
+    message: error.message,
+  });
   }
 };
 
