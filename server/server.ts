@@ -12,11 +12,7 @@ import bookingRouter from "./routes/bookingRoutes.js";
 import ownerRouter from "./routes/ownerRoutes.js";
 import adminRoutes from "./routes/adminRautes.js";
 import "./config/cloudinary.js";
-console.log("Cloud Name:", process.env.CLOUDINARY_CLOUD_NAME);
-console.log("API Key:", process.env.CLOUDINARY_API_KEY);
 const app = express();
-
-console.log("Mongo URI:", process.env.MONGODB_URI);
 
 // connect to MongoDB
 await connectDB();
