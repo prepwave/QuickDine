@@ -12,10 +12,17 @@ import bookingRouter from "./routes/bookingRoutes.js";
 import ownerRouter from "./routes/ownerRoutes.js";
 import adminRoutes from "./routes/adminRautes.js";
 import "./config/cloudinary.js";
+
+import { uploadTest } from "./config/cloudinary.js";
 const app = express();
 
 // connect to MongoDB
 await connectDB();
+
+await uploadTest();
+
+app.use(cors());
+
 import { v2 as cloudinary } from "cloudinary";
 
 try {

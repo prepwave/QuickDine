@@ -1,31 +1,52 @@
 import { Response } from "express";
 import { AuthRequest } from "../middlewares/auth.js";
 import Restaurant from "../models/Restaurants.js";
-import {v2 as cloudinary} from 'cloudinary'
+import cloudinary from "../config/cloudinary.js";
+console.log("Cloudinary Config:");
+console.log(cloudinary.config());
 import Booking from "../models/Booking.js";
 
 // Helper Function to upload buffer to cloudinary
-const uploadToCloudinary = (
+const uploadToCloudinary = async (
   fileBuffer: Buffer
 ): Promise<{ secure_url: string }> => {
-  return new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      { folder: "Quickdine" },
-      (error, result) => {
-        console.log("Cloudinary Error:", error);
-        console.log("Cloudinary Result:", result);
+  try {
+    console.log("Uploading image to Cloudinary...");
 
-        if (error) return reject(error);
-        if (!result) return reject(new Error("Upload failed"));
+    const result = await new Promise<any>((resolve, reject) => {
+      cloudinary.uploader
+        .upload_stream(
+          {
+            folder: "QuickDine",
+            resource_type: "image",
+          },
+          (error, result) => {
+            if (error) {
+              console.error("Cloudinary Upload Error:", error);
+              return reject(error);
+            }
 
-        resolve({ secure_url: result.secure_url });
-      }
-    );
+            if (!result) {
+              return reject(new Error("Upload failed"));
+            }
 
-    stream.end(fileBuffer);
-  });
+            resolve(result);
+          }
+        )
+        .end(fileBuffer);
+    });
+
+    console.log("Upload Success:", result.secure_url);
+
+    return {
+      secure_url: result.secure_url,
+    };
+  } catch (err) {
+    console.error("UPLOAD FAILED");
+    console.error(err);
+    throw err;
+  }
 };
-
 // ======================================================
 // Get owner's restaurant
 // GET /api/owner/restaurant

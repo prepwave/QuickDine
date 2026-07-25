@@ -60,15 +60,15 @@ export default function RestaurantWizard({ setRestaurant }: RestaurantWizardProp
     };
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0];
+    const file = e.target.files?.[0];
 
-  console.log(file);
+    console.log(file);
 
-  if (file) {
+    if (file) {
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
-  }
-}
+        }
+   };
 
 
 
