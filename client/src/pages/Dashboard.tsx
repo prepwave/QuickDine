@@ -26,8 +26,8 @@ export default function Dashboard() {
 
                 setBookings(res.data.bookings);
            } catch (error: any) {
-               toast.error(error?.response?.data?.message || error?.message);
-           } finally {
+    toast.error(error?.response?.data?.message || error?.message || "Something went wrong");
+} finally {
                setLoadingBookings(false);
            }
         };
@@ -45,8 +45,8 @@ export default function Dashboard() {
 
                 setRecommendations(res.data.restaurants);
             } catch (error: any) {
-                toast.error(error?.response?.data?.message || error?.message);
-            }
+    toast.error(error?.response?.data?.message || error?.message || "Something went wrong");
+}
         };
         fetchRecommendations();
     }, []);
@@ -61,9 +61,9 @@ export default function Dashboard() {
         //    Update local state 
         setBookings((prev) => prev.map((b) => (b._id === bookingId ? { ...b, status: "cancelled" } : b)))
             toast.success("Reservation cancelled successfully.");
-        } catch (error: any) {
-            toast.error(error?.response?.data?.message || error?.message);
-        }
+        }catch (error: any) {
+    toast.error(error?.response?.data?.message || error?.message || "Something went wrong");
+}
     };
 
     if (!user) return null;

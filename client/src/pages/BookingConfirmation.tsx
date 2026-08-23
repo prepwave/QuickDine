@@ -12,6 +12,7 @@ import BookingSummary from "../components/booking/BookingSummary.tsx";
 import BookingForm from "../components/booking/BookingForm.tsx";
 import api from "../lib/api.ts";
 
+
 export default function BookingConfirmation() {
     const { slug } = useParams<{ slug: string }>();
     const [searchParams] = useSearchParams();
@@ -52,10 +53,11 @@ export default function BookingConfirmation() {
                 setLoading(true);
                 const res = await api.get(`/restaurant/${slug}`);
                 setRestaurant(res.data.restaurant);
-           } catch (error) {
-                toast.error(error?.response?.data?.message || error?.message);
-                navigate("/");
-           }finally{
+           } catch (error: any) {
+    toast.error(error?.response?.data?.message || error?.message || "Something went wrong");
+}
+                
+           finally{
                setLoading(false);
            }
         };
@@ -90,9 +92,11 @@ export default function BookingConfirmation() {
             });
             setConfirmedBooking(res.data);
             toast.success("Reservation confirmed!");
-        } catch (error: any) {
-            toast.error(error?.response?.data?.message || error?.message);
-        } finally {
+        } 
+            catch (error: any) {
+               toast.error(error?.response?.data?.message || error?.message || "Something went wrong");
+}
+        finally {
             setConfirming(false);
         }
     };
